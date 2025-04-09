@@ -15,7 +15,7 @@ const app = express();
 
 // connecting the database
 
-const MONDODB_URI = process.env.MONGODB_URI || config.mongoURI[app.settings.env];
+const MONGODB_URI = process.env.MONGODB_URI || config.mongoURI[app.settings.env];
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true}, (err)=> {
 if (err){
 	console.log(err);
