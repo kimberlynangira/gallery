@@ -6,13 +6,22 @@ const config = require('./_config'); // Add this line
 const environment = process.env.NODE_ENV || 'development'; // Add this line
 const mongoURI = config.mongoURI[environment];
 
-// Define routes let index = require('./routes/index');
+// Define routes
+let index = require('./routes/index');
 let image = require('./routes/image');
+
+// Initializing the app
+const app = express();
 
 // connecting the database
 
-mongoose.connect(mongoURI, { useNewUrlParser: true , useUnifiedTopology: true }, (err)=>{
-    if (err) console.log(err)
+const MONDODB_URI = process.env.MONGODB_URI || config.mongoURI[app.settings.env];
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true}, (err)=> {
+if (err){
+	console.log(err);
+	} else {
+	console.log('Connected to Database: ${MONGODB_URI}');
+	}
 });
 
 // test if the database has connected successfully
@@ -20,10 +29,6 @@ let db = mongoose.connection;
 db.once('open', ()=>{
     console.log('Database connected successfully')
 })
-
-// Initializing the app
-const app = express();
-
 
 // View Engine
 app.set('view engine', 'ejs');
