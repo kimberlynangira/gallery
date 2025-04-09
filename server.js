@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
+const config = require('./_config'); // Add this line
+const environment = process.env.NODE_ENV || 'development'; // Add this line
+const mongoURI = config.mongoURI[environment];
 
 // Define routes
 let index = require('./routes/index');
