@@ -2,35 +2,64 @@ pipeline {
     agent any
     
     environment {
-        // Environment variables
+        RENDER_DEPLOY_HOOK = credentials('RENDER_DEPLOY_HOOK')
+        SLACK_CHANNEL = "#kimberly_IP1"
         EMAIL_TO = credentials('EMAIL_TO')
         NODE_ENV = 'production'
     }
     
+    triggers {
+        githubPush() // Automatically trigger on push to repository
+    }
+    
     stages {
-        stage('Setup') {
+        stage('Check Software Availability') {
             steps {
-                // Check software availability
                 sh 'node --version'
                 sh 'npm --version'
-                
-                // Install dependencies
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
                 sh 'npm install'
             }
         }
         
-        stage('Build') {
+        stage('Run Tests') {
             steps {
-                echo 'Building application...'
-                // Any build steps if needed
+                script {
+                    try {
+                        sh 'npm test'
+                    } catch (Exception e) {
+                        emailext (
+                            subject: "Test Failure: ${currentBuild.fullDisplayName}",
+                            body: "The tests failed in ${env.JOB_NAME} build #${env.BUILD_NUMBER}.\n\nCheck console output at ${env.BUILD_URL}",
+                            to: "${env.EMAIL_TO}"
+                        )
+                        throw e
+                    }
+                }
             }
         }
         
-        stage('Deploy') {
+        stage('Deploy to Render') {
             steps {
-                echo 'Deploying to Render...'
-                // In a real scenario, you would trigger a deploy to Render
+                sh "curl ${RENDER_DEPLOY_HOOK}"
             }
+        }
+    }
+    
+    post {
+        success {
+            slackSend channel: "${SLACK_CHANNEL}", 
+                      color: 'good', 
+                      message: "Deployment Successful! Build ID: ${env.BUILD_NUMBER}. View the site at: https://gallery-app.onrender.com"
+        }
+        failure {
+            slackSend channel: "${SLACK_CHANNEL}", 
+                      color: 'danger', 
+                      message: "Build Failed! Build ID: ${env.BUILD_NUMBER}"
         }
     }
 }
