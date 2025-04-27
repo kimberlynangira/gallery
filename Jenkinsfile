@@ -1,26 +1,35 @@
 pipeline {
-    agent any // This means the pipeline can run on any available Jenkins agent
-
-    triggers {
-        githubPush() // This will automatically trigger the pipeline on every push to your GitHub repository
+    agent any
+    
+    environment {
+        // Environment variables
+        EMAIL_TO = credentials('EMAIL_TO')
+        NODE_ENV = 'production'
     }
-
+    
     stages {
-        stage('Checkout Code') {
+        stage('Setup') {
             steps {
-                git 'https://github.com/kimberlynangira/gallery.git' // Replace with the actual URL of your forked repository
+                // Check software availability
+                sh 'node --version'
+                sh 'npm --version'
+                
+                // Install dependencies
+                sh 'npm install'
             }
         }
-
-        stage('Install Dependencies') {
+        
+        stage('Build') {
             steps {
-                sh 'npm install' // Assuming your project uses Yarn. If it uses npm, change to 'npm install'
+                echo 'Building application...'
+                // Any build steps if needed
             }
         }
-
-        stage('Deploy to Render') {
+        
+        stage('Deploy') {
             steps {
-                sh 'curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer rnd_oQvF1IBQ7cEEP6sW23rq440E92rM" -d \'{ "serviceId": "srv-cvqvk415pdvs73e63pm0" }\' https://api.render.com/v1/services/srv-cvqvk415pdvs73e63pm0/deploy'
+                echo 'Deploying to Render...'
+                // In a real scenario, you would trigger a deploy to Render
             }
         }
     }
