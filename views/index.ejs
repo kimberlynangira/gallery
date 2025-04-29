@@ -11,31 +11,28 @@
 <body style="background-color: #f4f4f4;">
 <h1>My Awesome Website</h1>
 <!-- Milestone Indicator for Jenkins Pipeline -->
-<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 5px solid #007bff;">
+<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
   <h2 style="color: #007bff; margin-top: 0;">MILESTONE 2</h2>
   <p>Basic CI/CD pipeline implemented with Jenkins</p>
 </div>
-
 <!-- Milestone Indicator for Test Integration -->
-<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 5px solid #28a745;">
+<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
   <h2 style="color: #28a745; margin-top: 0;">MILESTONE 3</h2>
   <p>Test integration from test branch complete</p>
 </div>
 <!-- Milestone Indicator for Slack Integration -->
-<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 5px solid #9c27b0;">
+<div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
   <h2 style="color: #9c27b0; margin-top: 0;">MILESTONE 4</h2>
   <p>Slack notification integration complete</p>
 </div>
-
-
  <div class="navbar-fixed">
     <nav class="turquoise" >
-      <div class="nav-wrapper  container">
-        <a href="/" class="brand-logo ">Darkroom</a>
+      <div class="nav-wrapper container">
+        <a href="/" class="brand-logo">Darkroom</a>
         <form class="right">
-          <div class="input-field ">
-            <input id="search" class="left"  type="search" required>
-            <label class="label-icon" for="search"><i class="material-icons right">search</i></label>
+          <div class="input-field">
+            <input id="search" class="left" type="search" required>
+            <label class="label-icon" for="search"><i class="material-icons">search</i></label>
             <i class="material-icons">close</i>
           </div>
         </form>
@@ -46,15 +43,14 @@
       </div>
     </nav>
   </div>
-    
     <div class="container">
-        <h1>Image Upload </h1>
+        <h1>Image Upload</h1>
         <%= typeof msg != 'undefined' ? msg : '' %>
-        <form action="/upload" method = "POST" enctype="multipart/form-data">
+        <form action="/upload" method="POST" enctype="multipart/form-data">
             <div class="file-field input-field">
               <div class="btn grey">
                 <span>Image</span>
-                <input name = "image" type="file">
+                <input name="image" type="file">
               </div>
               <div class="file-path-wrapper">
                 <input class="file-path validate" type="text">
@@ -64,26 +60,16 @@
         </form>
         <hr>
         <br>
-        
           <div class="row">
             <% images.forEach(function(image){ %>
-
               <div class="column">
-
-                <a href="/image/<%= image._id %>"> <img src="<%= image.path %>" class="responsive-img" alt="<%= image.name %>"> </a>
+                <a href="/image/<%= image._id %>"> <img src="<%= image.path %>" alt="<%= image.name %>"></a>
               </div>
-            <% }); %>  
+            <% }); %>
           </div>
-            
-              
-            
-        <!-- <img src="<%= typeof file != 'undefined' ? file : '' %>" class="responsive-img" alt=""> -->
+        <!-- <img src="<%= typeof file != 'undefined' ? file : '' %>" class="responsive-img"> -->
     </div>
-    
-    
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>
-                
