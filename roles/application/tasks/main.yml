@@ -1,0 +1,61 @@
+---
+- name: Create application directory
+  file:
+    path: "{{ app_root_dir }}"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0755'
+  become: true
+  tags:
+    - application
+    - setup
+
+- name: Clone application repository
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_root_dir }}"
+    version: main
+  tags:
+    - application
+    - clone
+
+- name: Create Docker network
+  docker_network:
+    name: "{{ docker_network_name }}"
+    state: present
+  tags:
+    - application
+    - network
+
+- name: Run MongoDB container
+  docker_container:
+    name: "{{ mongodb_container_name }}"
+    image: "{{ mongodb_image }}"
+    state: started
+    restart_policy: always
+    network_mode: "{{ docker_network_name }}"
+    ports:
+      - "{{ mongodb_port }}:27017"
+    volumes:
+      - "{{ mongodb_data_dir }}:/data/db"
+  tags:
+    - application
+    - mongodb
+
+- name: Build and run backend API
+  docker_container:
+    name: "{{ backend_container_name }}"
+    image: "{{ backend_image }}"
+    state: started
+    restart_policy: always
+    network_mode: "{{ docker_network_name }}"
+    ports:
+      - "{{ backend_port }}:5000"
+    volumes:
+      - "{{ backend_api_dir }}:/app"
+    working_dir: /app
+    command: bash -c "npm install && npm start"
+  tags:
+    - application
+    - backend

@@ -19,7 +19,4 @@ backend_port: 5000
 backend_api_dir: "{{ app_root_dir }}/server"
 
 # Frontend variables
-frontend_container_name: "frontend"
-frontend_image: "node:14"
-frontend_port: 3000
 frontend_dir: "{{ app_root_dir }}/client"
