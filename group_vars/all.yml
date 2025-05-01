@@ -1,0 +1,25 @@
+---
+# Application variables
+repo_url: "https://github.com/moringaschool/devopscapstone-eshop.git"
+app_root_dir: "/opt/e-commerce"
+
+# Docker variables
+docker_network_name: "ecommerce-network"
+
+# MongoDB variables
+mongodb_container_name: "mongodb"
+mongodb_image: "mongo:latest"
+mongodb_port: 27017
+mongodb_data_dir: "/data/db"
+
+# Backend variables
+backend_container_name: "backend-api"
+backend_image: "node:14"
+backend_port: 5000
+backend_api_dir: "{{ app_root_dir }}/server"
+
+# Frontend variables
+frontend_container_name: "frontend"
+frontend_image: "node:14"
+frontend_port: 3000
+frontend_dir: "{{ app_root_dir }}/client"
