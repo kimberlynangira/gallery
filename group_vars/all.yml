@@ -20,3 +20,6 @@ backend_api_dir: "{{ app_root_dir }}/server"
 
 # Frontend variables
 frontend_dir: "{{ app_root_dir }}/client"
+frontend_container_name: "frontend-app"
+frontend_image: "nginx:alpine"
+frontend_port: 80

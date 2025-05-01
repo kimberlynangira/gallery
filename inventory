@@ -1,2 +1,2 @@
 [targets]
-localhost ansible_connection=local
+vagrant ansible_connection=local

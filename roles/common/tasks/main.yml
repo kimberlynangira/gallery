@@ -10,14 +10,19 @@
 
 - name: Install required system packages
   apt:
-    name: "{{ item }}"
+    name: "{{ packages }}"
     state: present
   become: true
-  loop:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - gnupg
-    - lsb-release
-    - software-properties-common
-    - python3-pip
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - git
+      - python3-pip
+      - software-properties-common
+  tags:
+    - system
+    - dependencies

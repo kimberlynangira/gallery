@@ -3,8 +3,6 @@
   file:
     path: "{{ app_root_dir }}"
     state: directory
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
     mode: '0755'
   become: true
   tags:
@@ -15,47 +13,116 @@
   git:
     repo: "{{ repo_url }}"
     dest: "{{ app_root_dir }}"
-    version: main
+    force: yes
+  become: true
   tags:
     - application
-    - clone
+    - setup
 
-- name: Create Docker network
-  docker_network:
-    name: "{{ docker_network_name }}"
-    state: present
+- name: Create MongoDB data directory
+  file:
+    path: "{{ mongodb_data_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
   tags:
-    - application
-    - network
+    - mongodb
+    - setup
 
-- name: Run MongoDB container
+- name: Start MongoDB container
   docker_container:
     name: "{{ mongodb_container_name }}"
     image: "{{ mongodb_image }}"
     state: started
     restart_policy: always
-    network_mode: "{{ docker_network_name }}"
     ports:
       - "{{ mongodb_port }}:27017"
     volumes:
       - "{{ mongodb_data_dir }}:/data/db"
+    networks:
+      - name: "{{ docker_network_name }}"
   tags:
-    - application
     - mongodb
+    - container
 
-- name: Build and run backend API
-  docker_container:
-    name: "{{ backend_container_name }}"
-    image: "{{ backend_image }}"
-    state: started
-    restart_policy: always
-    network_mode: "{{ docker_network_name }}"
-    ports:
-      - "{{ backend_port }}:5000"
-    volumes:
-      - "{{ backend_api_dir }}:/app"
-    working_dir: /app
-    command: bash -c "npm install && npm start"
+- name: Build and start backend container
+  block:
+    - name: Create backend Dockerfile
+      copy:
+        content: |
+          FROM {{ backend_image }}
+          WORKDIR /app
+          COPY package*.json ./
+          RUN npm install
+          COPY . .
+          EXPOSE {{ backend_port }}
+          CMD ["npm", "start"]
+        dest: "{{ backend_api_dir }}/Dockerfile"
+      become: true
+
+    - name: Build backend image
+      docker_image:
+        build:
+          path: "{{ backend_api_dir }}"
+        name: backend-api
+        source: build
+      become: true
+
+    - name: Run backend container
+      docker_container:
+        name: "{{ backend_container_name }}"
+        image: backend-api
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ backend_port }}:5000"
+        env:
+          MONGO_URI: "mongodb://{{ mongodb_container_name }}:27017/shop"
+        networks:
+          - name: "{{ docker_network_name }}"
+      become: true
   tags:
-    - application
     - backend
+    - container
+
+- name: Build and start frontend container
+  block:
+    - name: Create frontend Dockerfile
+      copy:
+        content: |
+          FROM node:14 as build
+          WORKDIR /app
+          COPY package*.json ./
+          RUN npm install
+          COPY . .
+          RUN npm run build
+          
+          FROM nginx:alpine
+          COPY --from=build /app/build /usr/share/nginx/html
+          EXPOSE 80
+          CMD ["nginx", "-g", "daemon off;"]
+        dest: "{{ frontend_dir }}/Dockerfile"
+      become: true
+
+    - name: Build frontend image
+      docker_image:
+        build:
+          path: "{{ frontend_dir }}"
+        name: frontend-app
+        source: build
+      become: true
+
+    - name: Run frontend container
+      docker_container:
+        name: "{{ frontend_container_name }}"
+        image: frontend-app
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ frontend_port }}:80"
+        networks:
+          - name: "{{ docker_network_name }}"
+      become: true
+  tags:
+    - frontend
+    - container

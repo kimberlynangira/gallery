@@ -1,10 +1,37 @@
 ---
 - name: Deploy E-commerce Application
-  hosts: targets
-  become: false
-  gather_facts: true
+  hosts: all
+  become: true
   
+  vars_files:
+    - group_vars/all.yml
+    
+  pre_tasks:
+    - name: Ensure Python is installed for Ansible
+      raw: test -e /usr/bin/python3 || apt -y update && apt install -y python3-minimal
+      changed_when: false
+      
   roles:
-    - common
-    - docker
-    - application
+    - role: common
+      tags: [common, system]
+      
+    - role: docker
+      tags: [docker]
+      
+    - role: application
+      tags: [application]
+      
+  post_tasks:
+    - name: Check if application is running
+      uri:
+        url: http://localhost:5000/api/products
+        status_code: 200
+      register: api_status
+      ignore_errors: yes
+      tags: [verify]
+      
+    - name: Display application status
+      debug:
+        msg: "E-commerce application is running successfully"
+      when: api_status.status == 200
+      tags: [verify]
