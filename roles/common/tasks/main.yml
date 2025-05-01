@@ -1,0 +1,37 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+  tags:
+    - system
+    - update
+
+- name: Install required system packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    - git
+    - python3-pip
+  tags:
+    - system
+    - packages
+
+- name: Install Python Docker modules
+  pip:
+    name: 
+      - docker
+      - docker-compose
+    state: present
+  become: true
+  tags:
+    - python
+    - dependencies
